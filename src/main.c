@@ -50,6 +50,7 @@ int main(void)
 {
 	  adc_init();
 	  initLED();
+	  initUSART2();
 
   /**
   *  IMPORTANT NOTE!
