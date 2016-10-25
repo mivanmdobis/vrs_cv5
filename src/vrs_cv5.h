@@ -28,6 +28,9 @@
 
  uint16_t AD_value;
  int mode;
+ int counter;
+ char retazec[5];
+
 
 void adc_init(void);
 void initLED();

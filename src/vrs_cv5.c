@@ -129,6 +129,7 @@ void initUSART2(){
 
 	//interrupt
 	USART_ITConfig(USART2, USART_IT_RXNE, ENABLE);
+	USART_ITConfig(USART2, USART_IT_TC, ENABLE);
 
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);
 
@@ -139,18 +140,17 @@ void initUSART2(){
 	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&NVIC_InitStructure);
-
-
 }
 
 
 void PutcUART2(char ch){
 	USART_SendData(USART2, (uint8_t) ch);
-	while (USART_GetFlagStatus(USART2, USART_FLAG_TC) == RESET);
+	//while (USART_GetFlagStatus(USART2, USART_FLAG_TC) == RESET);
 }
 
 void USART2_IRQHandler(void)
 {
+
 	if(USART_GetITStatus(USART2, USART_IT_RXNE) != RESET)
 	{
 		USART_ClearITPendingBit(USART2, USART_IT_RXNE);
@@ -161,17 +161,29 @@ void USART2_IRQHandler(void)
 				mode = CLASIC;
 			else mode = FLOATING;
 
+    }else if(USART_GetITStatus(USART2, USART_IT_TC) != RESET)
+	{
+		USART_ClearITPendingBit(USART2, USART_IT_TC);
+
+		if (retazec[counter] != '\0'){
+			PutcUART2(retazec[counter]);
+			counter++;
+		}
     }
 }
 
 void sendValue(){
 
-	char retazec[10];
 	double AD_valueTmp;
 
-	if (mode == CLASIC)
-	  sprintf(retazec, "%d", AD_value);
-	else{
+	if (mode == CLASIC){
+
+		sprintf(retazec, "%d", AD_value);
+		retazec[4] = 13;
+		retazec[5] = '\0';
+
+
+	}else{
 
 		AD_valueTmp = AD_value;
 		AD_valueTmp = AD_valueTmp / 4096*3300.0;
@@ -184,21 +196,18 @@ void sendValue(){
 			sprintf(retazec, "%d", (int)AD_valueTmp);
 
 		sprintf(&retazec[2], "%d", (int)AD_valueTmp * 100);
-		retazec[5] = '\0';
+		retazec[6] = '\0';
+		retazec[5] = 13;
 		retazec[4] = 'V';
 		retazec[1] = '.';
 
+
 	}
 
-	int i = 0;
-	  while (retazec[i] != '\0'){
-		  PutcUART2(retazec[i]);
-		  i++;
-	  }
+	PutcUART2(retazec[0]);
+	counter = 1;
 
-	  PutcUART2(13);
-
-	  //sleep
-	  for (int i = 0; i < 50000; i++);
+	//sleep
+	for (int i = 0; i < 50000; i++);
 }
 
