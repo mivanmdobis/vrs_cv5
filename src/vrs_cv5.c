@@ -142,3 +142,28 @@ void initUSART2(){
 
 
 }
+
+
+void PutcUART2(char ch){
+	USART_SendData(USART2, (uint8_t) ch);
+	while (USART_GetFlagStatus(USART2, USART_FLAG_TC) == RESET);
+}
+
+
+void sendValue(){
+
+	char retazec[10];
+
+	sprintf(retazec, "%d", AD_value);
+
+	int i = 0;
+	  while (retazec[i] != '\0'){
+		  PutcUART2(retazec[i]);
+		  i++;
+	  }
+	  PutcUART2(13);
+
+	  //sleep
+	  for (int i = 0; i < 50000; i++);
+
+}

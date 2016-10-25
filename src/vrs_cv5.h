@@ -32,4 +32,6 @@ void blinkingLED(int period);
 void ADC1_IRQHandler (void);
 
 void initUSART2();
+void PutcUART2(char ch);
+void sendValue();
 #endif /* VRS_CV5_H_ */
