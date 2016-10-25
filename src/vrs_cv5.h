@@ -23,7 +23,11 @@
 
 #define B_VYP 3800
 
+#define CLASIC 1
+#define FLOATING 0
+
  uint16_t AD_value;
+ int mode;
 
 void adc_init(void);
 void initLED();
@@ -34,4 +38,5 @@ void ADC1_IRQHandler (void);
 void initUSART2();
 void PutcUART2(char ch);
 void sendValue();
+void USART2_IRQHandler(void);
 #endif /* VRS_CV5_H_ */

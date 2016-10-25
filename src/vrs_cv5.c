@@ -149,21 +149,56 @@ void PutcUART2(char ch){
 	while (USART_GetFlagStatus(USART2, USART_FLAG_TC) == RESET);
 }
 
+void USART2_IRQHandler(void)
+{
+	if(USART_GetITStatus(USART2, USART_IT_RXNE) != RESET)
+	{
+		USART_ClearITPendingBit(USART2, USART_IT_RXNE);
+		char znak = USART_ReceiveData(USART2);
+
+		if (znak == 'm')
+			if (mode == FLOATING)
+				mode = CLASIC;
+			else mode = FLOATING;
+
+    }
+}
 
 void sendValue(){
 
 	char retazec[10];
+	double AD_valueTmp;
 
-	sprintf(retazec, "%d", AD_value);
+	if (mode == CLASIC)
+	  sprintf(retazec, "%d", AD_value);
+	else{
+
+		AD_valueTmp = AD_value;
+		AD_valueTmp = AD_valueTmp / 4096*3300.0;
+
+		if (AD_valueTmp < 100)
+			sprintf(retazec, "00%d", (int)AD_valueTmp);
+		else if (AD_valueTmp < 1000)
+			sprintf(retazec, "0%d",(int) AD_valueTmp);
+		else
+			sprintf(retazec, "%d", (int)AD_valueTmp);
+
+		sprintf(&retazec[2], "%d", (int)AD_valueTmp * 100);
+		retazec[5] = '\0';
+		retazec[4] = 'V';
+		retazec[1] = '.';
+
+	}
 
 	int i = 0;
 	  while (retazec[i] != '\0'){
 		  PutcUART2(retazec[i]);
 		  i++;
 	  }
+
 	  PutcUART2(13);
 
 	  //sleep
 	  for (int i = 0; i < 50000; i++);
-
 }
+
